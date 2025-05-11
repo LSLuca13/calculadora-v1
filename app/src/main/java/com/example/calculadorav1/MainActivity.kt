@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,18 +30,25 @@ class MainActivity : AppCompatActivity() {
         val btn8 = findViewById<Button>(R.id.btn8)
         val btn9 = findViewById<Button>(R.id.btn9)
 
-        val btnPonto = findViewById<Button>(R.id.btnPonto)
-        val btnCE = findViewById<Button>(R.id.btnCE)
-        val btnC = findViewById<Button>(R.id.btnC)
         val btnMais = findViewById<Button>(R.id.btnMais)
         val btnMenos = findViewById<Button>(R.id.btnMenos)
         val btnMultiplicar = findViewById<Button>(R.id.btnMultiplicar)
         val btnDividir = findViewById<Button>(R.id.btnDividir)
         val btnIgual = findViewById<Button>(R.id.btnIgual)
+        val btnPonto = findViewById<Button>(R.id.btnPonto)
+        val btnCE = findViewById<Button>(R.id.btnCE)
+        val btnC = findViewById<Button>(R.id.btnC)
+        val btnBackspace = findViewById<Button>(R.id.btnBackspace)
 
-        val buttons = listOf(btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9)
+        val btnRaiz = findViewById<Button>(R.id.btnRaiz)
+        val btnQuadrado = findViewById<Button>(R.id.btnQuadrado)
+        val btnInverso = findViewById<Button>(R.id.btnInverso)
+        val btnPorcentagem = findViewById<Button>(R.id.btnPorcentagem)
+        val btnInverter = findViewById<Button>(R.id.btnInverter)
 
-        for (btn in buttons) {
+        val numberButtons = listOf(btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9)
+
+        for (btn in numberButtons) {
             btn.setOnClickListener {
                 if (display.text == "0" || isResult) {
                     display.text = btn.text
@@ -66,6 +74,11 @@ class MainActivity : AppCompatActivity() {
             temp1 = 0.0
             operacao = 0
             isResult = false
+        }
+
+        btnBackspace.setOnClickListener {
+            val txt = display.text.toString()
+            display.text = if (txt.length > 1) txt.dropLast(1) else "0"
         }
 
         btnMais.setOnClickListener {
@@ -103,6 +116,49 @@ class MainActivity : AppCompatActivity() {
             }
             display.text = if (result.isNaN()) "Erro" else result.toString()
             isResult = true
+        }
+
+        btnRaiz.setOnClickListener {
+            val value = display.text.toString().toDoubleOrNull()
+            if (value != null && value >= 0) {
+                display.text = sqrt(value).toString()
+                isResult = true
+            } else {
+                display.text = "Erro"
+            }
+        }
+
+        btnQuadrado.setOnClickListener {
+            val value = display.text.toString().toDoubleOrNull()
+            if (value != null) {
+                display.text = (value * value).toString()
+                isResult = true
+            }
+        }
+
+        btnInverso.setOnClickListener {
+            val value = display.text.toString().toDoubleOrNull()
+            if (value != null && value != 0.0) {
+                display.text = (1 / value).toString()
+                isResult = true
+            } else {
+                display.text = "Erro"
+            }
+        }
+
+        btnPorcentagem.setOnClickListener {
+            val value = display.text.toString().toDoubleOrNull()
+            if (value != null) {
+                display.text = (temp1 * value / 100).toString()
+                isResult = true
+            }
+        }
+
+        btnInverter.setOnClickListener {
+            val value = display.text.toString().toDoubleOrNull()
+            if (value != null) {
+                display.text = (-value).toString()
+            }
         }
     }
 }
