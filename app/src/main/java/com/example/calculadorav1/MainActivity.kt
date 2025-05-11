@@ -1,164 +1,179 @@
 package com.example.calculadorav1
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import kotlin.math.sqrt
+import kotlin.math.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var display: TextView
-    private var temp1 = 0.0
-    private var operacao = 0
-    private var isResult = false
+    private var valorAtual = ""
+    private var operacao = ""
+    private var memoria = 0.0
+    private var isNovoNumero = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // DISPLAY
         display = findViewById(R.id.display)
 
-        val btn0 = findViewById<Button>(R.id.btn0)
-        val btn1 = findViewById<Button>(R.id.btn1)
-        val btn2 = findViewById<Button>(R.id.btn2)
-        val btn3 = findViewById<Button>(R.id.btn3)
-        val btn4 = findViewById<Button>(R.id.btn4)
-        val btn5 = findViewById<Button>(R.id.btn5)
-        val btn6 = findViewById<Button>(R.id.btn6)
-        val btn7 = findViewById<Button>(R.id.btn7)
-        val btn8 = findViewById<Button>(R.id.btn8)
-        val btn9 = findViewById<Button>(R.id.btn9)
+        // NÚMEROS
+        val botoesNumeros = listOf(
+            R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4,
+            R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9
+        )
 
-        val btnMais = findViewById<Button>(R.id.btnMais)
-        val btnMenos = findViewById<Button>(R.id.btnMenos)
-        val btnMultiplicar = findViewById<Button>(R.id.btnMultiplicar)
-        val btnDividir = findViewById<Button>(R.id.btnDividir)
-        val btnIgual = findViewById<Button>(R.id.btnIgual)
-        val btnPonto = findViewById<Button>(R.id.btnPonto)
-        val btnCE = findViewById<Button>(R.id.btnCE)
-        val btnC = findViewById<Button>(R.id.btnC)
-        val btnBackspace = findViewById<Button>(R.id.btnBackspace)
-
-        val btnRaiz = findViewById<Button>(R.id.btnRaiz)
-        val btnQuadrado = findViewById<Button>(R.id.btnQuadrado)
-        val btnInverso = findViewById<Button>(R.id.btnInverso)
-        val btnPorcentagem = findViewById<Button>(R.id.btnPorcentagem)
-        val btnInverter = findViewById<Button>(R.id.btnInverter)
-
-        val numberButtons = listOf(btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9)
-
-        for (btn in numberButtons) {
-            btn.setOnClickListener {
-                if (display.text == "0" || isResult) {
-                    display.text = btn.text
+        botoesNumeros.forEach { id ->
+            findViewById<Button>(id).setOnClickListener {
+                val digito = (it as Button).text.toString()
+                if (isNovoNumero) {
+                    valorAtual = digito
+                    isNovoNumero = false
                 } else {
-                    display.append(btn.text)
+                    valorAtual += digito
                 }
-                isResult = false
+                display.text = valorAtual
             }
         }
 
-        btnPonto.setOnClickListener {
-            if (!display.text.contains(".")) {
-                display.append(".")
+        // PONTO
+        findViewById<Button>(R.id.btnPonto).setOnClickListener {
+            if (!valorAtual.contains(".")) {
+                valorAtual += if (valorAtual.isEmpty()) "0." else "."
+                display.text = valorAtual
             }
         }
 
-        btnCE.setOnClickListener {
+        // OPERAÇÕES BÁSICAS
+        findViewById<Button>(R.id.btnMais).setOnClickListener { prepararOperacao("+") }
+        findViewById<Button>(R.id.btnMenos).setOnClickListener { prepararOperacao("-") }
+        findViewById<Button>(R.id.btnMultiplicar).setOnClickListener { prepararOperacao("*") }
+        findViewById<Button>(R.id.btnDividir).setOnClickListener { prepararOperacao("/") }
+
+        // IGUAL
+        findViewById<Button>(R.id.btnIgual).setOnClickListener {
+            calcularResultado()
+        }
+
+        // LIMPAR
+        findViewById<Button>(R.id.btnCE).setOnClickListener {
+            valorAtual = ""
             display.text = "0"
         }
 
-        btnC.setOnClickListener {
+        findViewById<Button>(R.id.btnC).setOnClickListener {
+            valorAtual = ""
+            memoria = 0.0
+            operacao = ""
             display.text = "0"
-            temp1 = 0.0
-            operacao = 0
-            isResult = false
         }
 
-        btnBackspace.setOnClickListener {
-            val txt = display.text.toString()
-            display.text = if (txt.length > 1) txt.dropLast(1) else "0"
+        // OPERAÇÕES AVANÇADAS
+        findViewById<Button>(R.id.btnRaiz).setOnClickListener {
+            valorAtual = sqrt(valorAtual.toDouble()).toString()
+            display.text = valorAtual
+            isNovoNumero = true
         }
 
-        btnMais.setOnClickListener {
-            temp1 = display.text.toString().toDouble()
-            operacao = 1
-            isResult = true
+        findViewById<Button>(R.id.btnQuadrado).setOnClickListener {
+            valorAtual = (valorAtual.toDouble().pow(2)).toString()
+            display.text = valorAtual
+            isNovoNumero = true
         }
 
-        btnMenos.setOnClickListener {
-            temp1 = display.text.toString().toDouble()
-            operacao = 2
-            isResult = true
+        findViewById<Button>(R.id.btnFatorial).setOnClickListener {
+            valorAtual = fatorial(valorAtual.toInt()).toString()
+            display.text = valorAtual
+            isNovoNumero = true
         }
 
-        btnMultiplicar.setOnClickListener {
-            temp1 = display.text.toString().toDouble()
-            operacao = 3
-            isResult = true
+        findViewById<Button>(R.id.btnPotencia).setOnClickListener {
+            prepararOperacao("^")
         }
 
-        btnDividir.setOnClickListener {
-            temp1 = display.text.toString().toDouble()
-            operacao = 4
-            isResult = true
+        // TRIGONOMETRIA
+        findViewById<Button>(R.id.btnSen).setOnClickListener {
+            valorAtual = sin(valorAtual.toDouble()).toString()
+            display.text = valorAtual
+            isNovoNumero = true
         }
 
-        btnIgual.setOnClickListener {
-            val temp2 = display.text.toString().toDoubleOrNull() ?: 0.0
-            val result = when (operacao) {
-                1 -> temp1 + temp2
-                2 -> temp1 - temp2
-                3 -> temp1 * temp2
-                4 -> if (temp2 != 0.0) temp1 / temp2 else Double.NaN
-                else -> temp2
-            }
-            display.text = if (result.isNaN()) "Erro" else result.toString()
-            isResult = true
+        findViewById<Button>(R.id.btnCos).setOnClickListener {
+            valorAtual = cos(valorAtual.toDouble()).toString()
+            display.text = valorAtual
+            isNovoNumero = true
         }
 
-        btnRaiz.setOnClickListener {
-            val value = display.text.toString().toDoubleOrNull()
-            if (value != null && value >= 0) {
-                display.text = sqrt(value).toString()
-                isResult = true
-            } else {
-                display.text = "Erro"
-            }
+        findViewById<Button>(R.id.btnTan).setOnClickListener {
+            valorAtual = tan(valorAtual.toDouble()).toString()
+            display.text = valorAtual
+            isNovoNumero = true
         }
 
-        btnQuadrado.setOnClickListener {
-            val value = display.text.toString().toDoubleOrNull()
-            if (value != null) {
-                display.text = (value * value).toString()
-                isResult = true
-            }
+        // CONSTANTES
+        findViewById<Button>(R.id.btnPi).setOnClickListener {
+            valorAtual = PI.toString()
+            display.text = valorAtual
+            isNovoNumero = true
         }
 
-        btnInverso.setOnClickListener {
-            val value = display.text.toString().toDoubleOrNull()
-            if (value != null && value != 0.0) {
-                display.text = (1 / value).toString()
-                isResult = true
-            } else {
-                display.text = "Erro"
-            }
+        findViewById<Button>(R.id.btnE).setOnClickListener {
+            valorAtual = E.toString()
+            display.text = valorAtual
+            isNovoNumero = true
         }
 
-        btnPorcentagem.setOnClickListener {
-            val value = display.text.toString().toDoubleOrNull()
-            if (value != null) {
-                display.text = (temp1 * value / 100).toString()
-                isResult = true
-            }
+        // LOGARITMOS
+        findViewById<Button>(R.id.btnLn).setOnClickListener {
+            valorAtual = ln(valorAtual.toDouble()).toString()
+            display.text = valorAtual
+            isNovoNumero = true
         }
 
-        btnInverter.setOnClickListener {
-            val value = display.text.toString().toDoubleOrNull()
-            if (value != null) {
-                display.text = (-value).toString()
-            }
+        findViewById<Button>(R.id.btnLog).setOnClickListener {
+            valorAtual = log10(valorAtual.toDouble()).toString()
+            display.text = valorAtual
+            isNovoNumero = true
         }
+
+        // INVERSO
+        findViewById<Button>(R.id.btnInverso).setOnClickListener {
+            valorAtual = (1 / valorAtual.toDouble()).toString()
+            display.text = valorAtual
+            isNovoNumero = true
+        }
+    }
+
+    // BLOCO: PREPARAR OPERAÇÃO
+    private fun prepararOperacao(op: String) {
+        memoria = valorAtual.toDouble()
+        operacao = op
+        isNovoNumero = true
+    }
+
+    // BLOCO: CALCULAR RESULTADO
+    private fun calcularResultado() {
+        val segundoValor = valorAtual.toDouble()
+        val resultado = when (operacao) {
+            "+" -> memoria + segundoValor
+            "-" -> memoria - segundoValor
+            "*" -> memoria * segundoValor
+            "/" -> memoria / segundoValor
+            "^" -> memoria.pow(segundoValor)
+            else -> segundoValor
+        }
+        valorAtual = resultado.toString()
+        display.text = valorAtual
+        isNovoNumero = true
+    }
+
+    // BLOCO: FATORIAL
+    private fun fatorial(n: Int): Long {
+        return if (n <= 1) 1 else n * fatorial(n - 1)
     }
 }
